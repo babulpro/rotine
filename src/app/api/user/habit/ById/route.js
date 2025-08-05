@@ -1,5 +1,6 @@
 import { connectToDB } from "@/app/lib/DbConnect"
 import Routine from "@/app/models/Routine"
+import Habit from "@/app/models/Habit"
 import { NextResponse } from "next/server"
 
 export async function POST(req,res){
@@ -12,7 +13,7 @@ export async function POST(req,res){
         if(!id){
             return NextResponse.json({status:"fail",msg:"id is required"},{status:404})
         }
-        let findRoutine = await Routine.findById(id)
+        let findRoutine = await Habit.findById(id)
         if(!findRoutine){
             return NextResponse.json({status:"fail",msg:"routine not found"},{status:404})
         }
@@ -29,6 +30,7 @@ export async function POST(req,res){
 }
 
 
+
  export async function PUT(req) {
   try {
     await connectToDB();
@@ -41,35 +43,32 @@ export async function POST(req,res){
     if (!id) {
       return NextResponse.json(
         { status: "fail", message: "ID is required" },
-        { status: 400 } // Changed to 400 (Bad Request) for missing required field
+        { status: 400 }
       );
     }
 
     // Parse request body
     const data = await req.json();
 
-    // Check if routine exists
-    const existingRoutine = await Routine.findById(id);
-    if (!existingRoutine) {
+    // Check if habit exists
+    const existingHabit = await Habit.findById(id);
+    if (!existingHabit) {
       return NextResponse.json(
-        { status: "fail", message: "Routine not found" },
+        { status: "fail", message: "Habit not found" },
         { status: 404 }
       );
     }
 
-    // Update routine with validation and return the updated document
-    const updatedRoutine = await Routine.findByIdAndUpdate(
+    // Update habit
+    const updatedHabit = await Habit.findByIdAndUpdate(
       id,
       data,
-      { 
-        new: true, // Return the updated document
-        runValidators: true // Run model validators on update
-      }
+      { new: true } // Return the updated document
     );
 
-    if (!updatedRoutine) {
+    if (!updatedHabit) {
       return NextResponse.json(
-        { status: "fail", message: "Failed to update routine" },
+        { status: "fail", message: "Failed to update habit" },
         { status: 400 }
       );
     }
@@ -77,30 +76,29 @@ export async function POST(req,res){
     return NextResponse.json(
       { 
         status: "success", 
-        message: "Routine updated successfully",
-        data: updatedRoutine // Include the updated routine in response
+        message: "Habit updated successfully",
+        data: updatedHabit 
       },
       { status: 200 }
     );
 
   } catch (error) {
-    console.error("Error updating routine:", error);
+    console.error("Error updating habit:", error);
     return NextResponse.json(
-      { 
-        status: "error", 
-        message: error.message || "Internal server error" 
-      },
-      { status: 500 } // Changed to 500 for server errors
+      { status: "error", message: "Internal server error" },
+      { status: 500 }
     );
   }
 }
+ 
+
 
 export async function DELETE(req){
     try{
         await connectToDB()
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
-        const data = await Routine.findByIdAndDelete(id)
+        const data = await Habit.findByIdAndDelete(id)
       
        return NextResponse.json({status:"success"})
        
@@ -117,7 +115,7 @@ export async function GET(req){
         await connectToDB()
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
-        const data = await Routine.findById(id)
+        const data = await Habit.findById(id)
       
        return NextResponse.json({status:"success",data:data})
        

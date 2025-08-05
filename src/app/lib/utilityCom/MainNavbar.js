@@ -32,7 +32,7 @@ const MainNavbar =async () => {
                             tabIndex={0}
                             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
                              <li> <Link href={'/dashboard/pages/routine'}>Routine</Link></li>
-                              <li> <Link href={'/dashboard/pages/place'}>Place</Link></li>
+                              <li> <Link href={'/dashboard/pages/habit'}>Habit</Link></li>
                               <li> <Link href={'/dashboard/pages/'}>Work</Link></li>
                                  
                             <li><a>Item 3</a></li>
@@ -43,7 +43,7 @@ const MainNavbar =async () => {
                 <div className="navbar-center hidden lg:flex">
                     <ul className="menu menu-horizontal px-1">
                     <li><Link href={'/dashboard/pages/routine'}>Routine</Link></li>
-                    <li><Link href={'/dashboard/pages/place'}>Place</Link></li>
+                    <li><Link href={'/dashboard/pages/habit'}>Habit</Link></li>
                     <li><Link href={'/dashboard/pages/'}>Work</Link></li>
                      
                     <li><a>Item 3</a></li>

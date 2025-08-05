@@ -2,65 +2,63 @@
 
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 
-export default function Page() {
-  const router = useRouter()
-  const [routines, setRoutines] = useState([]);
+export default function HabitTracker() {
+  const router = useRouter();
+  const [habits, setHabits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [data, setData] = useState({
-    timeSlot: '',
-    task: '',
+  const [formData, setFormData] = useState({
+    title: '',
+    frequency: '',
   });
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchHabits = async () => {
       try {
-        const response = await fetch("/api/user/routine", { cache: "no-cache" });
-        if (!response.ok) throw new Error("Failed to fetch routines");
+        const response = await fetch("/api/user/habit", { cache: "no-cache" });
+        if (!response.ok) throw new Error("Failed to fetch habits");
         const { data } = await response.json();
-        setRoutines(data);
+        setHabits(data || []);
       } catch (err) {
-        setError(err.message || "Failed to load routines");
+        setError(err.message || "Failed to load habits");
+        setHabits([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+
+    fetchHabits();
   }, []);
 
-  const inputChange = (name, value) => {
-    setData(prev => ({ ...prev, [name]: value }));
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const FormSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!data.timeSlot.trim() || !data.task.trim()) {
+    if (!formData.title.trim() || !formData.frequency.trim()) {
       alert("Please fill in all fields");
       return;
     }
 
-    // Confirmation dialog
-    const isConfirmed = window.confirm("Are you sure you want to add this routine?");
-    if (!isConfirmed) return;
-
     try {
-      const response = await fetch("/api/user/routine", {
+      const response = await fetch("/api/user/habit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formData),
       });
-      
-      if (!response.ok) throw new Error("Failed to add routine");
 
-      const { data: newRoutine, status } = await response.json();
+      if (!response.ok) throw new Error("Failed to add habit");
+
+      const { data, status } = await response.json();
       
       if (status === "success") {
-        setRoutines(prev => [newRoutine, ...prev]);
-        setData({ timeSlot: "", task: "" });
-        alert("Routine added successfully!");
+        setHabits(prev => [data, ...prev]);
+        setFormData({ title: "", frequency: "" });
       }
     } catch (error) {
       alert(error.message || "Something went wrong");
@@ -68,24 +66,21 @@ export default function Page() {
   };
 
   const handleDelete = async (id) => {
-    // Confirmation dialog
-    const isConfirmed = window.confirm("Are you sure you want to delete this routine?");
-    if (!isConfirmed) return;
+    if (!confirm("Are you sure you want to delete this habit?")) return;
 
     try {
-      const res = await fetch(`/api/user/routine/ById?id=${id}`, {
+      const res = await fetch(`/api/user/habit/ById?id=${id}`, {
         method: 'DELETE',
       });
       const { status } = await res.json();
       
       if (status === 'success') {
-        setRoutines(prev => prev.filter(routine => routine._id !== id));
-        alert("Routine deleted successfully");
+        setHabits(prev => prev.filter(habit => habit._id !== id));
       } else {
         throw new Error('Delete failed');
       }
     } catch (error) {
-      alert(error.message || "Error deleting routine");
+      alert(error.message || "Error deleting habit");
     }
   };
 
@@ -98,58 +93,58 @@ export default function Page() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      {/* Form Section */}
-      <div className="max-w-4xl mx-auto p-6">
+    <div className="min-h-screen bg-gray-900 text-gray-100">
+      {/* Add Habit Form */}
+      <section className="max-w-4xl mx-auto p-4 md:p-6">
         <div className="bg-gray-800 rounded-lg shadow-lg p-6">
           <h1 className="text-2xl font-bold text-center mb-6 text-blue-400">
-            Add Your Daily Routine
+            Add New Habit
           </h1>
           
-          <form onSubmit={FormSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="timeSlot" className="block mb-2 font-medium text-gray-300">
-                  Time Slot
+                <label htmlFor="title" className="block mb-2 font-medium">
+                  Your Place
                 </label>
                 <input
                   type="text"
-                  name="timeSlot"
-                  value={data.timeSlot}
-                  onChange={(e) => inputChange("timeSlot", e.target.value)}
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
                   className="input input-bordered w-full bg-gray-700"
-                  placeholder="e.g., 8:00 AM - 9:00 AM"
+                  placeholder="Home"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="task" className="block mb-2 font-medium text-gray-300">
-                  Task
+                <label htmlFor="frequency" className="block mb-2 font-medium">
+                  Your Habit
                 </label>
                 <input
                   type="text"
-                  name="task"
-                  value={data.task}
-                  onChange={(e) => inputChange("task", e.target.value)}
+                  name="frequency"
+                  value={formData.frequency}
+                  onChange={handleInputChange}
                   className="input input-bordered w-full bg-gray-700"
-                  placeholder="It's time to study properly"
+                  placeholder="Keep Your Mobile Away"
                   required
                 />
               </div>
             </div>
 
             <button type="submit" className="btn btn-primary w-full">
-              Add Routine
+              Add Habit
             </button>
           </form>
         </div>
-      </div>
+      </section>
 
-      {/* Routines List Section */}
-      <div className="max-w-6xl mx-auto p-6">
+      {/* Habits List */}
+      <section className="max-w-6xl mx-auto p-4 md:p-6">
         <h1 className="text-2xl font-bold mb-6 text-blue-400">
-          Your Daily Routines
+          Your Habits
         </h1>
 
         {error && (
@@ -161,40 +156,42 @@ export default function Page() {
           </div>
         )}
 
-        {routines.length === 0 ? (
+        {habits.length === 0 ? (
           <div className="alert alert-info">
             <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <span>No routines found. Create your first routine!</span>
+            <span>No habits found. Add your first habit!</span>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {routines.map((routine) => (
-              <div key={routine._id} className="card bg-gray-800 shadow-xl hover:shadow-2xl transition-shadow">
+          <div className="grid gap-4 md:grid-cols-1">
+            {habits.map((habit) => (
+              <div key={habit._id} className="card bg-gray-800 shadow-xl hover:shadow-2xl transition-shadow">
                 <div className="card-body p-4">
                   <div className="flex justify-between items-start gap-2">
                     <h2 className="text-lg font-semibold break-words flex-1">
-                      {routine.timeSlot}
+                      {habit.title}
                     </h2>
-                    <Link 
-                      href={`/dashboard/pages/routine/mypage/${routine._id}`}
-                      className="btn btn-xs btn-outline btn-secondary"
-                    >
-                      Edit
-                    </Link>
+                    <div className="flex gap-2">
+                      <Link 
+                        href={`/dashboard/pages/habit/${habit._id}`}
+                        className="btn btn-xs btn-outline btn-secondary"
+                      >
+                        Edit
+                      </Link>
+                    </div>
                   </div>
 
                   <p className="text-gray-300 mt-2 break-words">
-                    {routine.task}
+                    {habit.frequency}
                   </p>
 
                   <div className="card-actions justify-between items-center mt-4">
                     <span className="text-xs text-gray-400">
-                      {new Date(routine.createdAt).toLocaleDateString()}
+                      {new Date(habit.createdAt).toLocaleDateString()}
                     </span>
                     <button 
-                      onClick={() => handleDelete(routine._id)}
+                      onClick={() => handleDelete(habit._id)}
                       className="btn btn-xs btn-error"
                     >
                       Delete
@@ -205,7 +202,7 @@ export default function Page() {
             ))}
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }
