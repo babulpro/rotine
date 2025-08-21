@@ -44,7 +44,7 @@ export default function EditRoutinePage() {
       
       const { status } = await response.json();
       if (status === "success") {
-        router.push("/dashboard/pages/routine");
+        router.push("/dashboard/pages/routine/myRoutine");
       }
     } catch (err) {
       alert(err.message);

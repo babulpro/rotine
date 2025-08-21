@@ -9,10 +9,7 @@ export default function Page() {
   const [routines, setRoutines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [data, setData] = useState({
-    timeSlot: '',
-    task: '',
-  });
+   
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,42 +27,7 @@ export default function Page() {
     fetchData();
   }, []);
 
-  const inputChange = (name, value) => {
-    setData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const FormSubmit = async (e) => {
-    e.preventDefault();
     
-    if (!data.timeSlot.trim() || !data.task.trim()) {
-      alert("Please fill in all fields");
-      return;
-    }
-
-    // Confirmation dialog
-    const isConfirmed = window.confirm("Are you sure you want to add this routine?");
-    if (!isConfirmed) return;
-
-    try {
-      const response = await fetch("/api/user/routine", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) throw new Error("Failed to add routine");
-
-      const { data: newRoutine, status } = await response.json();
-      
-      if (status === "success") {
-        setRoutines(prev => [newRoutine, ...prev]);
-        setData({ timeSlot: "", task: "" });
-        alert("Routine added successfully!");
-      }
-    } catch (error) {
-      alert(error.message || "Something went wrong");
-    }
-  };
 
   const handleDelete = async (id) => {
     // Confirmation dialog
@@ -91,60 +53,15 @@ export default function Page() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-900">
-      {/* Form Section */}
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-gray-800 rounded-lg shadow-lg p-6">
-          <h1 className="text-2xl font-bold text-center mb-6 text-blue-400">
-            Add Your Daily Routine
-          </h1>
-          
-          <form onSubmit={FormSubmit} className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="timeSlot" className="block mb-2 font-medium text-gray-300">
-                  Time Slot
-                </label>
-                <input
-                  type="text"
-                  name="timeSlot"
-                  value={data.timeSlot}
-                  onChange={(e) => inputChange("timeSlot", e.target.value)}
-                  className="input input-bordered w-full bg-gray-700"
-                  placeholder="e.g., 8:00 AM - 9:00 AM"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="task" className="block mb-2 font-medium text-gray-300">
-                  Task
-                </label>
-                <input
-                  type="text"
-                  name="task"
-                  value={data.task}
-                  onChange={(e) => inputChange("task", e.target.value)}
-                  className="input input-bordered w-full bg-gray-700"
-                  placeholder="It's time to study properly"
-                  required
-                />
-              </div>
-            </div>
-
-            <button type="submit" className="btn btn-primary w-full">
-              Add Routine
-            </button>
-          </form>
-        </div>
-      </div>
+      
 
       {/* Routines List Section */}
       <div className="max-w-6xl mx-auto p-6">
@@ -169,12 +86,12 @@ export default function Page() {
             <span>No routines found. Create your first routine!</span>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-1">
             {routines.map((routine) => (
               <div key={routine._id} className="card bg-gray-800 shadow-xl hover:shadow-2xl transition-shadow">
                 <div className="card-body p-4">
                   <div className="flex justify-between items-start gap-2">
-                    <h2 className="text-lg font-semibold break-words flex-1">
+                    <h2 className="text-lg font-semibold break-words flex-1 underline">
                       {routine.timeSlot}
                     </h2>
                     <Link 
@@ -185,12 +102,12 @@ export default function Page() {
                     </Link>
                   </div>
 
-                  <p className="text-gray-300 mt-2 break-words">
+                  <p className="text-gray-200 text-2xl mt-2 break-words ">
                     {routine.task}
                   </p>
 
                   <div className="card-actions justify-between items-center mt-4">
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-gray-600">
                       {new Date(routine.createdAt).toLocaleDateString()}
                     </span>
                     <button 

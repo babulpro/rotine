@@ -12,7 +12,7 @@ export async function POST(req) {
     await connectToDB()
 
     // 2. Get cookies (no need for await)
-    const cookieStore = cookies()
+    const cookieStore =await cookies()
     const token = cookieStore.get('token')?.value
 
     if (!token) {

@@ -30,10 +30,29 @@ const MainNavbar =async () => {
                          </div>
                             <ul
                             tabIndex={0}
-                            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-                             <li> <Link href={'/dashboard/pages/routine'}>Routine</Link></li>
+                            className="menu menu-m dropdown-content bg-base-100 rounded-box z-1 mt-3 w-64 p-2 shadow">
+                             <li> <Link href={'/'}>Home</Link></li>
+                            <li>
+                               <details>
+                                  <summary>Routine</summary>
+                                      <ul className="p-2 text-sm">
+                                            <li><Link href={"/dashboard/pages/routine/myRoutine"}>My Routine</Link></li>
+                                             <li><Link href={"/dashboard/pages/routine/addRoutine"}>Add Routine</Link></li>
+                                       </ul>
+                                </details>
+                            </li>
+                            <li>
+                               <details>
+                                  <summary>Habit</summary>
+                                      <ul className="p-2 text-sm">
+                                            <li><Link href={"/dashboard/pages/habit/myHabit"}>My Habit</Link></li>
+                                             <li><Link href={"/dashboard/pages/habit/addHabit"}>Add Habit</Link></li>
+                                       </ul>
+                                </details>
+                            </li>
+
                               <li> <Link href={'/dashboard/pages/habit'}>Habit</Link></li>
-                              <li> <Link href={'/dashboard/pages/'}>Work</Link></li>
+                              <li> <Link href={'/dashboard/pages/time'}>Flow</Link></li>
                                  
                             <li><a>Item 3</a></li>
                             </ul>
@@ -42,9 +61,35 @@ const MainNavbar =async () => {
                 </div>
                 <div className="navbar-center hidden lg:flex">
                     <ul className="menu menu-horizontal px-1">
-                    <li><Link href={'/dashboard/pages/routine'}>Routine</Link></li>
-                    <li><Link href={'/dashboard/pages/habit'}>Habit</Link></li>
-                    <li><Link href={'/dashboard/pages/'}>Work</Link></li>
+                    <li><Link href={'/'}>Home</Link></li>
+                     <li>
+                        <details>
+                          <summary>Routine</summary>
+                          <ul className="p-2 text-xs w-32">
+                            <li ><Link href={"/dashboard/pages/routine/myRoutine"} className="w-full" >My Routine</Link></li>
+                            <li><Link href={"/dashboard/pages/routine/addRoutine"} className="w-full">Add Routine</Link></li>
+                          </ul>
+                        </details>
+                      </li>
+                     <li>
+                        <details>
+                          <summary>Habit</summary>
+                          <ul className="p-2 text-xs w-32">
+                            <li><Link href={"/dashboard/pages/habit/myHabit"} className="w-full">My Habit</Link></li>
+                            <li><Link href={"/dashboard/pages/habit/addHabit"} className="w-full">Add Habit</Link></li>
+                          </ul>
+                        </details>
+                      </li>
+                     <li>
+                        <details>
+                          <summary>Tracker</summary>
+                          <ul className="p-2 text-xs w-32">
+                            <li><Link href={"/dashboard/pages/time/addDailyTime"} className="w-full">Day Time</Link></li>
+                            <li><Link href={"/dashboard/pages/time/yourTime"} className="w-full">Your Flow TimeS</Link></li>
+                          </ul>
+                        </details>
+                      </li>
+                    <li><Link href={'/dashboard/pages/time'}>Flow</Link></li>
                      
                     <li><a>Item 3</a></li>
                     </ul>

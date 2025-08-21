@@ -44,7 +44,7 @@ export default function EditHabitPage() {
         body: JSON.stringify(formData),
       });
       if (!response.ok) throw new Error("Update failed");
-      router.push("/dashboard/pages/habit");
+      router.push("/dashboard/pages/habit/myHabit");
     } catch (error) {
       alert(error.message);
     }
