@@ -70,7 +70,7 @@ export default function TimeTrackerPage() {
   const fetchTimeEntries = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/user/timeEntry');
+      const response = await fetch('http://localhost:3000//api/user/timeEntry');
       const data = await response.json();
       if (data.status === 'success') {
         setEntries(data.data || []);
@@ -123,7 +123,7 @@ export default function TimeTrackerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="py-10 px-5 bg-gray-900 sm:px-6 lg:px-8">
       <div className="md:w-4/5 m-auto bg-gray-700 shadow-2xl rounded-lg p-6">
         <h1 className="text-3xl font-bold text-center mb-8">Your Time Tracking</h1>
 

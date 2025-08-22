@@ -6,19 +6,8 @@ import Image from 'next/image'
  
  
 
-const MainNavbar = () => {
-  // const router = useRouter()
-
-   const logOut = async () => {
-    const config = { method: "get" };
-    let response = await fetch("/api/user/createUser", config, { cache: "force-cache" });
-    let json = await response.json();
-
-    if (json.status === "ok") {
-      toast.success("Log Out Success");
-      window.location.replace("/");
-    }
-  }; 
+const Navbar = () => {
+  
 
     return (
         <div className="">
@@ -57,22 +46,10 @@ const MainNavbar = () => {
                         <li><Link href={"/dashboard/pages/time/yourTime"} className="w-full">Tracker</Link></li>
                         <li><Link href={'/dashboard/pages/time'}>Apex</Link></li>
                     </ul>
-                </div>
-                 <div className="navbar-end">
-                   
-                        <button
-                          onClick={logOut}
-                          type="submit"
-                          className="btn btn-ghost"
-                        >
-                          Logout
-                        </button>
-
-                     
-                </div>
+                </div> 
             </div>
         </div>
     );
 };
 
-export default MainNavbar;
+export default Navbar;

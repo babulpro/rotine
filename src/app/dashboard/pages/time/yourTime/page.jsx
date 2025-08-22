@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import Link from "next/link"
 
 export default function TimeTrackerPage() {
   const [entries, setEntries] = useState([]);
@@ -14,7 +15,7 @@ export default function TimeTrackerPage() {
   const fetchTimeEntries = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/user/timeEntry');
+      const response = await fetch('http://localhost:3000/api/user/timeEntry');
       const data = await response.json();
       if (data.status === 'success') {
         setEntries(data.data || []);
@@ -49,7 +50,10 @@ export default function TimeTrackerPage() {
   return (
     <div className="min-h-screen bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
       <div className="md:w-4/5  m-auto bg-gray-700 shadow-2xl rounded-lg p-6">
-        <h1 className="text-3xl font-bold text-center mb-8">Your Time Tracking</h1>
+        <div className="flex justify-between">        
+        <div><h1 className="text-3xl font-bold text-center mb-8">Your Time Tracking</h1></div>
+        <div><Link href={"/dashboard/pages/time/addDailyTime"}>Add Day Performance</Link></div>
+        </div>
 
         <div className="bg-gray-800 shadow rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Time Entries</h2>

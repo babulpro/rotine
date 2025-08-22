@@ -65,9 +65,19 @@ export default function Page() {
 
       {/* Routines List Section */}
       <div className="max-w-6xl mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-6 text-blue-400">
-          Your Daily Routines
-        </h1>
+        <div className =" flex justify-between px-5 py-2 ">
+          <div>
+            <h1 className="text-2xl font-bold mb-6 text-blue-400 underline">
+              Your Daily Routines
+            </h1>
+          </div>
+          
+          <div className="underline text-slate-300 font-bold hover:text-slate-500">
+              <Link href={"/dashboard/pages/routine/addRoutine"}>Add Routine</Link>
+          </div>
+
+
+        </div>
 
         {error && (
           <div className="alert alert-error mb-6">

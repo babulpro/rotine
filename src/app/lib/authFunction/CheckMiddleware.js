@@ -15,7 +15,7 @@ export async function CheckCookies(req) {
  
   }
   catch(e){
-    return NextResponse.redirect(new URL('/',req.url))
+    return NextResponse.redirect(new URL('/user/login',req.url))
   }
  
 

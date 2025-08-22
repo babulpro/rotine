@@ -51,15 +51,10 @@ export async function POST(req) {
 }
 
 
-export async function GET() {
-    try {
-        await connectToDB();
-        const users = await User.find({});
-        return NextResponse.json(users);
-    } catch (error) {
-        return NextResponse.json(
-        { error: 'Database query failed' },
-        { status: 500 }
-        );
-    }
+export async function GET(req) {
+    cookies().delete('token')
+    return NextResponse.json({
+        msg:"request Completed",status:"ok"
+    })   
+      
 }

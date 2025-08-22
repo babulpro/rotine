@@ -68,9 +68,17 @@ export default function HabitTracker() {
 
       {/* Habits List */}
       <section className="max-w-6xl mx-auto p-4 md:p-6">
-        <h1 className="text-2xl font-bold mb-6 text-blue-400">
-          Your Habits
-        </h1>
+        <div className="flex justify-between">
+            <div >
+                <h1 className="text-2xl font-bold mb-6 text-blue-400">
+                  Your Habits
+                </h1>
+            </div>
+
+            <div className="text-slate-300 hover:text-slate-500 font-bold">
+               <Link href={"/dashboard/pages/habit/addHabit"}>Add Habit</Link>
+            </div>
+        </div>
 
         {error && (
           <div className="alert alert-error mb-6">

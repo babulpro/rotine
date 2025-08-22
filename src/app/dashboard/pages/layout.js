@@ -1,4 +1,4 @@
-
+ "use client"
 import Footer from "@/app/lib/utilityCom/Footer";
 import MainNavbar from "@/app/lib/utilityCom/MainNavbar";
 

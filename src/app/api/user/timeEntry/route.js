@@ -7,104 +7,112 @@ import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
-    // 1. Validate and parse request body
     const data = await req.json();
-    
-    // 2. Connect to database
     await connectToDB();
 
-    // 3. Verify authentication
+    // Auth check
     const cookieStore = cookies();
-    const token = cookieStore.get('token')?.value;
-    
+    const token = cookieStore.get("token")?.value;
     if (!token) {
-      return NextResponse.json(
-        { status: "fail", msg: "Authentication required" },
-        { status: 401 }
-      );
+      return NextResponse.json({ status: "fail", msg: "Authentication required" }, { status: 401 });
     }
 
-    // 4. Verify and decode JWT
     const payload = await DecodedJwtToken(token);
-    const email = payload['email'];
-    
+    const email = payload?.email;
     if (!email) {
-      return NextResponse.json(
-        { status: "fail", msg: "Invalid token" },
-        { status: 401 }
-      );
+      return NextResponse.json({ status: "fail", msg: "Invalid token" }, { status: 401 });
     }
 
-    // 5. Find user
     const user = await User.findOne({ email });
-    
     if (!user) {
+      return NextResponse.json({ status: "fail", msg: "User not found" }, { status: 404 });
+    }
+
+    // Convert input into total minutes
+    const mobileMinutes = (data.mobileUse?.hours || 0) * 60 + (data.mobileUse?.minutes || 0);
+    const productivityMinutes = (data.productivity?.hours || 0) * 60 + (data.productivity?.minutes || 0);
+    const othersMinutes = (data.others?.hours || 0) * 60 + (data.others?.minutes || 0);
+
+    // Rule: If mobile = 24 hours, productivity must be 0
+    if (mobileMinutes >= 1440 && productivityMinutes > 0) {
       return NextResponse.json(
-        { status: "fail", msg: "User not found" },
-        { status: 404 }
+        { status: "fail", msg: "If mobile use is 24 hours, productivity must be 0" },
+        { status: 400 }
       );
     }
 
-    // Get today's date at midnight for comparison
+    // Total check (must not exceed 24 hrs)
+    const totalMinutes = mobileMinutes + productivityMinutes + othersMinutes;
+    if (totalMinutes > 1440) {
+      return NextResponse.json(
+        { status: "fail", msg: "Total daily time cannot exceed 24 hours" },
+        { status: 400 }
+      );
+    }
+
+    // Prepare normalized data (store back in hours/minutes format)
+    const normalizedData = {
+      mobileUse: { hours: Math.floor(mobileMinutes / 60), minutes: mobileMinutes % 60 },
+      productivity: { hours: Math.floor(productivityMinutes / 60), minutes: productivityMinutes % 60 },
+      others: { hours: Math.floor(othersMinutes / 60), minutes: othersMinutes % 60 }
+    };
+
+    // Check today's entry
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // 6. Check if entry exists for today
     const existingEntry = await TimeEntry.findOne({
       userId: user._id,
-      date: {
-        $gte: today,
-        $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
-      }
+      date: { $gte: today, $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) }
     });
 
     if (existingEntry) {
-      // Update existing entry by adding new time values
+      // Merge existing + new in minutes
+      const mergedMobile = (existingEntry.mobileUse.hours * 60 + existingEntry.mobileUse.minutes) + mobileMinutes;
+      const mergedProductivity = (existingEntry.productivity.hours * 60 + existingEntry.productivity.minutes) + productivityMinutes;
+      const mergedOthers = (existingEntry.others.hours * 60 + existingEntry.others.minutes) + othersMinutes;
+
+      const mergedTotal = mergedMobile + mergedProductivity + mergedOthers;
+      if (mergedTotal > 1440) {
+        return NextResponse.json(
+          { status: "fail", msg: "Total daily time cannot exceed 24 hours" },
+          { status: 400 }
+        );
+      }
+
+      // Enforce rule again: 24h mobile => 0 productivity
+      if (mergedMobile >= 1440 && mergedProductivity > 0) {
+        return NextResponse.json(
+          { status: "fail", msg: "If mobile use is 24 hours, productivity must be 0" },
+          { status: 400 }
+        );
+      }
+
+      // Update entry
       const updatedEntry = await TimeEntry.findByIdAndUpdate(
         existingEntry._id,
         {
-          $inc: {
-            'mobileUse.hours': data.mobileUse?.hours || 0,
-            'mobileUse.minutes': data.mobileUse?.minutes || 0,
-            'productivity.hours': data.productivity?.hours || 0,
-            'productivity.minutes': data.productivity?.minutes || 0,
-            'others.hours': data.others?.hours || 0,
-            'others.minutes': data.others?.minutes || 0
-          }
+          mobileUse: { hours: Math.floor(mergedMobile / 60), minutes: mergedMobile % 60 },
+          productivity: { hours: Math.floor(mergedProductivity / 60), minutes: mergedProductivity % 60 },
+          others: { hours: Math.floor(mergedOthers / 60), minutes: mergedOthers % 60 }
         },
         { new: true }
       );
 
-      return NextResponse.json(
-        { status: "success", data: updatedEntry, msg: "Time entry updated" },
-        { status: 200 }
-      );
+      return NextResponse.json({ status: "success", data: updatedEntry, msg: "Time entry updated" }, { status: 200 });
     } else {
       // Create new entry
-      const timeEntryData = {
-        ...data,
+      const newTimeEntry = await TimeEntry.create({
+        ...normalizedData,
         userId: user._id,
         date: new Date()
-      };
+      });
 
-      const newTimeEntry = await TimeEntry.create(timeEntryData);
-      
-      if (!newTimeEntry) {
-        throw new Error("Failed to create time entry");
-      }
-
-      return NextResponse.json(
-        { status: "success", data: newTimeEntry, msg: "New time entry created" },
-        { status: 201 }
-      );
+      return NextResponse.json({ status: "success", data: newTimeEntry, msg: "New time entry created" }, { status: 201 });
     }
-
   } catch (error) {
     console.error("Error in POST /api/time-entries:", error);
-    return NextResponse.json(
-      { status: "error", msg: error.message || "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ status: "error", msg: error.message || "Internal server error" }, { status: 500 });
   }
 }
 

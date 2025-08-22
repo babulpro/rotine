@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 
@@ -13,37 +13,48 @@ export default function TimeTrackerPage() {
   });
 
   const handleTimeChange = (category, field, value) => {
-    // Allow empty input (will be treated as 0)
     if (value === "") {
       setTimeData(prev => ({
         ...prev,
-        [category]: {
-          ...prev[category],
-          [field]: 0
-        }
+        [category]: { ...prev[category], [field]: 0 }
       }));
       return;
     }
 
-    // Only allow numbers
     const numValue = parseInt(value);
     if (isNaN(numValue)) return;
 
-    // Basic range validation
-    if (field === "hours" && (numValue < 0 || numValue > 24)) return;
+    if (field === "hours" && (numValue < 0 || numValue > 12)) return;
     if (field === "minutes" && (numValue < 0 || numValue > 59)) return;
 
     setTimeData(prev => ({
       ...prev,
-      [category]: {
-        ...prev[category],
-        [field]: numValue
-      }
+      [category]: { ...prev[category], [field]: numValue }
     }));
   };
 
+  // 🔹 Compute total minutes & hours
+  const { totalMinutes, totalHours, remainingHours } = useMemo(() => {
+    const toMinutes = (h, m) => (h || 0) * 60 + (m || 0);
+    const mobile = toMinutes(timeData.mobileUse.hours, timeData.mobileUse.minutes);
+    const productivity = toMinutes(timeData.productivity.hours, timeData.productivity.minutes);
+    const others = toMinutes(timeData.others.hours, timeData.others.minutes);
+
+    const total = mobile + productivity + others;
+    return {
+      totalMinutes: total,
+      totalHours: (total / 60).toFixed(2),
+      remainingHours: (14 - total / 60).toFixed(2)
+    };
+  }, [timeData]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (totalMinutes > 14 * 60) {
+      toast.error("Total time cannot exceed 14 hours per day.");
+      return;
+    }
 
     try {
       const res = await fetch("/api/user/timeEntry", {
@@ -77,9 +88,9 @@ export default function TimeTrackerPage() {
   ];
 
   return (
-    <div className=" bg-gray-900 ">
-      <div className=" md:w-4/5 m-auto bg-gray-700 shadow-2xl rounded-lg p-6">
-        <h1 className="text-3xl font-bold text-center mb-8">Daily Time Tracker</h1>
+    <div className="bg-gray-900 min-h-screen flex items-center justify-center">
+      <div className="md:w-4/5 bg-gray-700 shadow-2xl rounded-lg p-6">
+        <h1 className="text-3xl font-bold text-center mb-6">Daily Time Tracker</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {categories.map(({ key, label }) => (
@@ -94,7 +105,7 @@ export default function TimeTrackerPage() {
                     <input
                       type="number"
                       min={0}
-                      max={field === "hours" ? 24 : 59}
+                      max={field === "hours" ? 12 : 59}
                       value={timeData[key][field] || ""}
                       onChange={(e) => handleTimeChange(key, field, e.target.value)}
                       className="w-full px-3 py-2 border border-gray-500 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
@@ -106,9 +117,22 @@ export default function TimeTrackerPage() {
             </div>
           ))}
 
+          {/* 🔹 Show total & remaining */}
+          <div className="text-center text-gray-200">
+            <p>Total: {totalHours} hrs</p>
+            <p>Remaining: {remainingHours >= 0 ? remainingHours : 0} hrs</p>
+            {totalMinutes > 14 * 60 && (
+              <p className="text-red-500 font-semibold mt-2">
+                ⚠️ Total cannot exceed 14 hrs
+              </p>
+            )}
+          </div>
+
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            disabled={totalMinutes > 14 * 60}
+            className={`w-full text-white font-medium py-2 px-4 rounded-md shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+              ${totalMinutes > 14 * 60 ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
           >
             Save Entry
           </button>

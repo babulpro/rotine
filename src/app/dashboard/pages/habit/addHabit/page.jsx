@@ -52,7 +52,7 @@ export default function HabitTracker() {
  
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
+    <div className="py-10 bg-gray-900 text-gray-100">
       {/* Add Habit Form */}
       <section className="max-w-4xl mx-auto p-4 md:p-6">
         <div className="bg-gray-800 rounded-lg shadow-lg p-6">
