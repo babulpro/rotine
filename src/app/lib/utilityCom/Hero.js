@@ -14,7 +14,7 @@ export default function Hero() {
   return (
        
 
-        <div className="bg-base-100 py-16 font-Geist ">
+        <div className="bg-base-100 py-10 font-Geist ">
                 <div className='m-auto p-3 '>
                     <div className="grid lg:grid-cols-2 gap-5 min-h-1/2 ">
                             <div className="  shadow-xl">
@@ -27,10 +27,7 @@ export default function Hero() {
                                     className="rounded-lg p-2"
                                 />
 
-                                {/* Overlay */}
-                                {/* <div className="absolute inset-0 bg-slate-900 opacity-50 rounded-lg p-2"></div>
-                                </div>
-                         */}
+                               
                             </div>
                             <div className=" text-center text-slate-300 shadow-xl flex justify-center items-center py-14">
                                     
@@ -56,6 +53,7 @@ export default function Hero() {
                             </div>
                     </div>
                 </div>
+
         </div>
   );
 }

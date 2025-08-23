@@ -14,13 +14,13 @@ export default function Home() {
   return (
        
 
-        <div className=" container m-auto font-Geist ">
+        <div className="font-Geist ">
                 <div className='p-3 '>
                     {/* //hero part */}
                     <div className="grid lg:grid-cols-2 md:gap-5 shadow-2xl pb-5">
                             <div className="">
                                 <Image
-                                    src={`/home1.jpg`}
+                                    src={`/news.jpg`}
                                     alt="Hero Image"
                                     width={500}
                                     height={400}
@@ -391,8 +391,8 @@ export default function Home() {
     </div>
     <div className="bg-gradient-to-br from-indigo-600 to-indigo-500 rounded-lg p-5 shadow-md text-center">
       <h4 className="font-bold text-xl">3 hrs</h4>
-      <p className="text-sm text-slate-100">Average Productivty</p>
-    </div>
+      <p className="text-sm text-slate-100">Average Productivity Time</p>
+    </div>  
     <div className="bg-gradient-to-br from-green-600 to-pink-500 rounded-lg p-5 shadow-md text-center">
       <h4 className="font-bold text-xl">1.5 hrs</h4>
       <p className="text-sm text-slate-100">Distraction Time</p>

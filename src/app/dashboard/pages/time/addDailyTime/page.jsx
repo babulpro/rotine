@@ -67,12 +67,12 @@ export default function TimeTrackerPage() {
 
       if (result.status === "success") {
         toast.success("Time entry saved successfully!");
-        setTimeData({
-          mobileUse: { hours: 0, minutes: 0 },
-          productivity: { hours: 0, minutes: 0 },
-          others: { hours: 0, minutes: 0 }
-        });
-        router.refresh();
+        // setTimeData({
+        //   mobileUse: { hours: 0, minutes: 0 },
+        //   productivity: { hours: 0, minutes: 0 },
+        //   others: { hours: 0, minutes: 0 }
+        // });
+        router.push("/dashboard/pages/time/yourTime")
       } else {
         throw new Error(result.msg || "Failed to save entry");
       }

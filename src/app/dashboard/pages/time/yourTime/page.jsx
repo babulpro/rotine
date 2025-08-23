@@ -15,10 +15,11 @@ export default function TimeTrackerPage() {
   const fetchTimeEntries = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3000/api/user/timeEntry');
+      const response = await fetch('/api/user/timeEntry');
       const data = await response.json();
       if (data.status === 'success') {
         setEntries(data.data || []);
+
       }
     } catch (error) {
       toast.error('Failed to fetch entries');

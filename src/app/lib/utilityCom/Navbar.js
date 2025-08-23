@@ -20,7 +20,8 @@ const Navbar = () => {
                             <ul
                             tabIndex={0}
                             className="menu menu-m dropdown-content bg-base-100 rounded-box z-1 mt-3 w-64 p-2 shadow">
-                                <li> <Link href={'/dashboard/pages'}>Home</Link></li>
+                                <li> <Link href={'/'}>Home</Link></li>
+                                <li> <Link href={'/dashboard/pages'}>News</Link></li>
                                 <li> <Link href={'/dashboard/pages/routine/myRoutine'}>Routine</Link></li>
                                 <li><Link href={"/dashboard/pages/habit/myHabit"}>Habit</Link></li>
                                 <li><Link href={"/dashboard/pages/time/yourTime"} className="w-full">Tracker</Link></li>
@@ -40,7 +41,8 @@ const Navbar = () => {
                 </div>
                 <div className="navbar-center hidden lg:flex">
                     <ul className="menu menu-horizontal px-1">
-                        <li><Link href={'/dashboard/pages'}>Home</Link></li>
+                        <li><Link href={'/'}>Home</Link></li>
+                        <li><Link href={'/dashboard/pages'}>News</Link></li>
                         <li><Link href={'/dashboard/pages/routine/myRoutine'}>Routine</Link></li>
                         <li><Link href={"/dashboard/pages/habit/myHabit"} className="w-full">Habit</Link></li>
                         <li><Link href={"/dashboard/pages/time/yourTime"} className="w-full">Tracker</Link></li>
