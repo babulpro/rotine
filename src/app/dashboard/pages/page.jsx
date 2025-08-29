@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import Hero from "@/app/lib/utilityCom/Hero";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -7,6 +7,7 @@ export default function Page() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [copiedId, setCopiedId] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,10 +27,21 @@ export default function Page() {
     fetchData();
   }, []);
 
+  const handleCopyLink = async (id) => {
+    const url = `${window.location.origin}/dashboard/pages/article/${id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      console.error("Failed to copy link:", err);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
       </div>
     );
   }
@@ -51,28 +63,39 @@ export default function Page() {
       {/* data showing */}
       <div className="grid gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
         {data.map((item) => (
-          <Link key={item._id} href={`/dashboard/pages/article/${item._id}`}>
-            <div className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition cursor-pointer">
-              {item.image && (
-                <img
-                  src={item.image}
-                  alt={item.heading || "Article image"}
-                  className="w-full h-48 object-cover"
-                />
-              )}
-              <div className="p-4">
-                <h2 className="text-xl font-semibold text-indigo-700 mb-2">
+          <div
+            key={item._id}
+            className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition"
+          >
+            {item.image && (
+              <img
+                src={item.image}
+                alt={item.heading || "Article image"}
+                className="w-full h-48 object-cover"
+              />
+            )}
+            <div className="p-4">
+              <Link href={`/dashboard/pages/article/${item._id}`}>
+                <h2 className="text-xl font-semibold text-indigo-700 mb-2 cursor-pointer hover:underline">
                   {item.heading || "Untitled"}
                 </h2>
-                <p className="text-gray-700">
-                  {item.article?.split(" ").slice(0, 20).join(" ")}...
-                </p>
-                <p className="text-xs text-gray-400 mt-3">
-                  {new Date(item.createdAt).toLocaleDateString()}
-                </p>
-              </div>
+              </Link>
+              <p className="text-gray-700">
+                {item.article?.split(" ").slice(0, 20).join(" ")}...
+              </p>
+              <p className="text-xs text-gray-400 mt-3">
+                {new Date(item.createdAt).toLocaleDateString()}
+              </p>
+
+              {/* Copy Link button */}
+              <button
+                onClick={() => handleCopyLink(item._id)}
+                className="mt-3 px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700"
+              >
+                {copiedId === item._id ? "✅ Link Copied!" : "Copy Link to Share"}
+              </button>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
     </div>

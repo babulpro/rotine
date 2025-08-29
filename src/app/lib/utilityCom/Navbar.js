@@ -28,16 +28,16 @@ const Navbar = () => {
                                 <li> <Link href={'/dashboard/pages/time'}>Apex</Link></li>
                             </ul>
                      </div>
-                     <div className="w-15 h-15">
-                        <Link  href={'/'}>
+                    <div className="hidden md:block w-15 h-15">
+                        <Link href={'/'}>
                             <Image
-                                src="/routine.png"
-                                width={100}
-                                height={100}
-                                alt="Picture of the author"
-                              />
+                            src="/routine.png"
+                            width={100}
+                            height={100}
+                            alt="Routine app logo"
+                            />
                         </Link>
-                     </div>
+                        </div>
                 </div>
                 <div className="navbar-center hidden lg:flex">
                     <ul className="menu menu-horizontal px-1">

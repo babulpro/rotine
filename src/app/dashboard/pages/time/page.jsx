@@ -9,7 +9,24 @@ export default function TimeTrackerPage() {
   const [activeText, setActiveText] = useState("Analyzing...");
   const [weeklyData, setWeeklyData] = useState(null);
 
-  // Memoized calculations
+  // Calculate weekly totals from daily entries
+  const calculateWeeklyTotals = useCallback((entries) => {
+    if (!entries || entries.length === 0) return null;
+
+    const sumCategory = (key) =>
+      entries.reduce((acc, entry) => {
+        const val = entry[key];
+        return acc + (val?.hours || 0) + (val?.minutes || 0) / 60;
+      }, 0);
+
+    return {
+      mobileUse: sumCategory("mobileUse"),
+      productivity: sumCategory("productivity"),
+      others: sumCategory("others"),
+    };
+  }, []);
+
+  // Memoized percentages for chart
   const timeAverages = useMemo(() => {
     const totals = { mobileUse: 0, productivity: 0, others: 0 };
 
@@ -20,7 +37,7 @@ export default function TimeTrackerPage() {
     });
 
     const total = totals.mobileUse + totals.productivity + totals.others;
-    
+
     return {
       mobileUse: total ? (totals.mobileUse / total) * 100 : 0,
       productivity: total ? (totals.productivity / total) * 100 : 0,
@@ -28,6 +45,7 @@ export default function TimeTrackerPage() {
     };
   }, [entries]);
 
+  // Warning message based on percentages
   const warningMessage = useMemo(() => {
     if (timeAverages.mobileUse > 50)
       return { message: "⚠️ Too much mobile usage!", color: "bg-red-900/50" };
@@ -38,34 +56,17 @@ export default function TimeTrackerPage() {
     return null;
   }, [timeAverages]);
 
-  // Memoized chart segments
-  const chartSegments = useMemo(() => [
-    { key: "mobileUse", color: "#ff3e3e", delay: "0s", icon: "📱", label: "Mobile" },
-    { key: "productivity", color: "#2dd4bf", delay: "0.3s", icon: "💻", label: "Productivity" },
-    { key: "others", color: "#facc15", delay: "0.6s", icon: "🕒", label: "Others" },
-  ], []);
+  // Chart segments
+  const chartSegments = useMemo(
+    () => [
+      { key: "mobileUse", color: "#ff3e3e", delay: "0s", icon: "📱", label: "Mobile" },
+      { key: "productivity", color: "#2dd4bf", delay: "0.3s", icon: "💻", label: "Productivity" },
+      { key: "others", color: "#facc15", delay: "0.6s", icon: "🕒", label: "Others" },
+    ],
+    []
+  );
 
-  // Process weekly data from API
-  const processWeeklyData = useCallback((weeklyEntries) => {
-    if (!weeklyEntries || weeklyEntries.length === 0) return null;
-    
-    // Assuming the API returns an array of weekly entries
-    // Let's use the most recent week
-    const latestWeek = weeklyEntries[weeklyEntries.length - 1];
-    
-    // Calculate totals for each category
-    const mobileTotal = (latestWeek.mobileUse?.hours || 0) + (latestWeek.mobileUse?.minutes || 0) / 60;
-    const productivityTotal = (latestWeek.productivity?.hours || 0) + (latestWeek.productivity?.minutes || 0) / 60;
-    const othersTotal = (latestWeek.others?.hours || 0) + (latestWeek.others?.minutes || 0) / 60;
-    
-    return {
-      mobileUse: mobileTotal,
-      productivity: productivityTotal,
-      others: othersTotal
-    };
-  }, []);
-
-  // Callbacks
+  // Animate active text
   const startTextAnimation = useCallback(() => {
     const texts = ["Tracking Time", "Measuring Focus", "Your Balance", "Your Time Breakdown"];
     let index = 0;
@@ -74,50 +75,31 @@ export default function TimeTrackerPage() {
       index = (index + 1) % texts.length;
       if (index === texts.length - 1) clearInterval(interval);
     }, 800);
-    
+
     return () => clearInterval(interval);
   }, []);
 
+  // Fetch entries from backend
   const fetchTimeEntries = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch("/api/user/timeEntry");
       const data = await res.json();
-      
+
       if (data.status === "success") {
         setEntries(data.data || []);
-        
-        // Process weekly data - handle different API response formats
-        if (data.weekly) {
-          setWeeklyData(processWeeklyData(data.weekly));
-        } else if (data.data && data.data.weekly) {
-          // If weekly data is nested differently
-          setWeeklyData(processWeeklyData(data.data.weekly));
-        } else {
-          // If no weekly data, create sample data for demonstration
-          setWeeklyData({
-            mobileUse: 12.5,
-            productivity: 28.2,
-            others: 8.7
-          });
-        }
+        setWeeklyData(calculateWeeklyTotals(data.data || []));
       }
     } catch (error) {
       toast.error("Failed to fetch entries");
       console.error("API Error:", error);
-      
-      // For demo purposes, create sample data if API fails
-      setWeeklyData({
-        mobileUse: 12.5,
-        productivity: 28.2,
-        others: 8.7
-      });
+      setWeeklyData(null);
     } finally {
       setLoading(false);
     }
-  }, [processWeeklyData]);
+  }, [calculateWeeklyTotals]);
 
-  // Hooks
+  // Initial effects
   useEffect(() => {
     fetchTimeEntries();
   }, [fetchTimeEntries]);
@@ -144,13 +126,10 @@ export default function TimeTrackerPage() {
         {/* Chart Section */}
         <div className="bg-gray-800 shadow rounded-lg p-6 mb-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            {/* Chart */}
             <div className="relative w-72 h-72 mx-auto">
               <svg className="w-full h-full" viewBox="0 0 100 100">
                 {chartSegments.map((seg, i, arr) => {
-                  const offset =
-                    25 -
-                    arr.slice(0, i).reduce((sum, s) => sum + timeAverages[s.key], 0);
+                  const offset = 25 - arr.slice(0, i).reduce((sum, s) => sum + timeAverages[s.key], 0);
                   return (
                     <circle
                       key={seg.key}
@@ -160,18 +139,14 @@ export default function TimeTrackerPage() {
                       fill="transparent"
                       stroke={seg.color}
                       strokeWidth="12"
-                      strokeDasharray={`${timeAverages[seg.key]} ${
-                        100 - timeAverages[seg.key]
-                      }`}
+                      strokeDasharray={`${timeAverages[seg.key]} ${100 - timeAverages[seg.key]}`}
                       strokeDashoffset={offset}
                       transform="rotate(-90 50 50)"
                     >
                       <animate
                         attributeName="stroke-dasharray"
                         from="0 100"
-                        to={`${timeAverages[seg.key]} ${
-                          100 - timeAverages[seg.key]
-                        }`}
+                        to={`${timeAverages[seg.key]} ${100 - timeAverages[seg.key]}`}
                         dur="1.2s"
                         begin={seg.delay}
                         fill="freeze"
@@ -180,7 +155,6 @@ export default function TimeTrackerPage() {
                   );
                 })}
 
-                {/* Center Text */}
                 <g transform="translate(50, 50)">
                   <circle r="25" fill="#1e293b" opacity="0.8">
                     <animate attributeName="r" values="25;28;25" dur="3s" repeatCount="indefinite" />
@@ -200,7 +174,6 @@ export default function TimeTrackerPage() {
               </svg>
             </div>
 
-            {/* Message + Legend */}
             <div className="flex-1">
               {warningMessage && (
                 <div className={`p-4 mb-4 rounded-lg ${warningMessage.color}`}>
@@ -222,10 +195,10 @@ export default function TimeTrackerPage() {
           </div>
         </div>
 
-        {/* Weekly Section - Fixed */}
+        {/* Weekly Section */}
         <div className="bg-gray-800 shadow rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Weekly Totals</h2>
-          
+
           {!weeklyData ? (
             <p className="text-gray-400 text-center py-4">No weekly data found</p>
           ) : (
@@ -237,20 +210,20 @@ export default function TimeTrackerPage() {
                   <div className="text-lg font-semibold">Mobile</div>
                   <div className="text-xl mt-2">{weeklyData.mobileUse.toFixed(1)} hours</div>
                 </div>
-                
+
                 <div className="bg-gray-600 p-4 rounded-lg text-center">
                   <div className="text-2xl font-bold text-teal-400 mb-2">💻</div>
                   <div className="text-lg font-semibold">Productivity</div>
                   <div className="text-xl mt-2">{weeklyData.productivity.toFixed(1)} hours</div>
                 </div>
-                
+
                 <div className="bg-gray-600 p-4 rounded-lg text-center">
                   <div className="text-2xl font-bold text-yellow-400 mb-2">🕒</div>
                   <div className="text-lg font-semibold">Others</div>
                   <div className="text-xl mt-2">{weeklyData.others.toFixed(1)} hours</div>
                 </div>
               </div>
-              
+
               <div className="mt-6 pt-4 border-t border-gray-600">
                 <h4 className="text-md font-medium mb-3">Detailed Breakdown:</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">

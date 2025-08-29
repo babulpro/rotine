@@ -42,24 +42,35 @@ export async function POST(req){
 
 
 
-export async function GET(req,res){
-    try{
-         await connectToDB()
-         const storeCookies = await cookies()
-         const token =await storeCookies.get('token')?.value
-         if(!token){
-            return NextResponse.json({status:"fail",msg:"something went wrong"})
-         }
-          
-        const payload = await DecodedJwtToken(token)           
-        const user = await User.findOne({_id:payload['id']}) 
-        const data = await Articles.find() 
+export async function GET(req, res) {
+  try {
+    await connectToDB();
+    const storeCookies = await cookies();
+    const token = storeCookies.get("token")?.value;
 
-        return NextResponse.json({status:"success",msg:"data get found",data:data},{status:200})
-        
+    if (!token) {
+      return NextResponse.json({ status: "fail", msg: "Something went wrong" });
+    }
 
+    const payload = await DecodedJwtToken(token);
+    const user = await User.findOne({ _id: payload["id"] });
+
+    if (!user) {
+      return NextResponse.json({ status: "fail", msg: "User not found" }, { status: 404 });
     }
-    catch(e){
-        return NextResponse.json({status:"fail",msg:"User not fount"},{satatus:404})
-    }
+
+    // ✅ Sort articles by createdAt DESC (latest first)
+    const data = await Articles.find().sort({ createdAt: -1 });
+
+    return NextResponse.json(
+      { status: "success", msg: "Data found", data },
+      { status: 200 }
+    );
+  } catch (e) {
+    console.error("GET API Error:", e);
+    return NextResponse.json(
+      { status: "fail", msg: "Something went wrong" },
+      { status: 500 }
+    );
+  }
 }

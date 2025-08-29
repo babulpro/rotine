@@ -79,9 +79,7 @@ export default function Page(){
                                       <div>
                                         <input type='submit' value='login' className="p-1 hover:text-slate-500 "/><br/>
                                       </div>
-                                      <div>
-                                        <Link href="/dashboard/pages">Dashboard</Link>
-                                      </div>
+                                      
                                   </div>
                                   <div className="flex justify-between">
                                     <Link href="/user/registation" className="text-xs p-1 hover:text-slate-500 shadow-2xl">Don't have account?</Link>

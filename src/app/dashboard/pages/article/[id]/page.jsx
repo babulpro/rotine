@@ -29,11 +29,13 @@ export default function EditRoutinePage() {
   }, [id]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+     
+      return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
       </div>
     );
+     
   }
 
   if (error) {
@@ -52,45 +54,58 @@ export default function EditRoutinePage() {
     );
   }
 
+  // split article body into paragraphs
+  const paragraphs = data.article
+    ? data.article.split(/\n\s*\n/) // split by double line breaks
+    : [];
+
   return (
-    <div className="md:w-3/4  m-auto p-6 bg-slate-300">
-      <div className="bg-slate-400 shadow-xl rounded-2xl overflow-hidden">
+    <main className="bg-slate-500 py-10 px-1 flex justify-center">
+      <article className="bg-white shadow-lg rounded-2xl overflow-hidden w-full max-w-3xl">
         {/* Cover image */}
         {data.image && (
-          <img
-            src={data.image}
-            alt={data.heading || "Article image"}
-            className="w-full h-80 "
-          />
+          <div className="w-full">
+            <img
+              src={data.image}
+              alt={data.heading || "Article image"}
+              className="w-full h-80 object-cover"
+            />
+          </div>
         )}
 
         <div className="p-8">
           {/* Heading */}
-          <h1 className="text-3xl font-extrabold text-indigo-800 mb-4 leading-snug underline">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-indigo-800 mb-6 leading-snug">
             {data.heading || "Untitled"}
           </h1>
 
           {/* Author + Date */}
-          <div className="flex items-center gap-4 mb-6">
-            {/* Avatar (fallback if no profilePic) */}
-            <div className="w-10 h-10 bg-slate-500 rounded-full border">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-12 h-12 bg-slate-500 rounded-full flex items-center justify-center text-white font-bold">
+              {data.userId?.name?.[0]?.toUpperCase() || "?"}
             </div>
             <div>
-              <p className="  font-medium">
+              <p className="font-medium text-slate-900">
                 {data.userId?.name || "Unknown Author"}
               </p>
-              <p className="  text-sm">
+              <p className="text-sm text-slate-500">
                 Published: {new Date(data.createdAt).toLocaleDateString()}
               </p>
             </div>
           </div>
 
           {/* Article Body */}
-          <p className="text-slate-800 text-lg leading-relaxed whitespace-pre-line">
-            {data.article}
-          </p>
+          <div className="space-y-6 text-slate-800 text-lg leading-relaxed">
+            {paragraphs.length > 0
+              ? paragraphs.map((para, index) => (
+                  <p key={index} className="whitespace-pre-line">
+                    {para.trim()}
+                  </p>
+                ))
+              : data.article}
+          </div>
         </div>
-      </div>
-    </div>
+      </article>
+    </main>
   );
 }
