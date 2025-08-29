@@ -119,14 +119,14 @@ export default function TimeTrackerPage() {
   }
 
   return (
-    <div className="py-10 px-5 bg-gray-900 sm:px-6 lg:px-8">
+    <div className="py-10 bg-gray-900 sm:px-6 lg:px-8">
       <div className="md:w-4/5 m-auto bg-gray-700 shadow-2xl rounded-lg p-6">
         <h1 className="text-3xl font-bold text-center mb-8">Your Time Tracking</h1>
 
         {/* Chart Section */}
-        <div className="bg-gray-800 shadow rounded-lg p-6 mb-8">
+        <div className="bg-gray-800 shadow rounded-lg md:p-6 p-2 mb-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="relative w-72 h-72 mx-auto">
+            <div className="relative md:w-72 md:h-72 w-44 h-44 mx-auto">
               <svg className="w-full h-full" viewBox="0 0 100 100">
                 {chartSegments.map((seg, i, arr) => {
                   const offset = 25 - arr.slice(0, i).reduce((sum, s) => sum + timeAverages[s.key], 0);

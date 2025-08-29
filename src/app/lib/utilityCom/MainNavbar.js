@@ -39,7 +39,7 @@ const MainNavbar = () => {
                                 <li> <Link href={'/dashboard/pages/time'}>Apex</Link></li>
                             </ul>
                      </div>
-                     <div className="w-15 h-15">
+                     <div className="w-15 h-15 hidden md:block">
                         <Link  href={'/'}>
                             <Image
                                 src="/routine.png"
