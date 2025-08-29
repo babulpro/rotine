@@ -1,0 +1,16 @@
+ 
+services:
+  web:
+    build:
+      context: .
+      target: runner
+      args:
+        NODE_VERSION: "20.12.2"
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MONGODB_URI=${MONGODB_URI}   # Atlas connection string from .env
+    restart: unless-stopped
+
